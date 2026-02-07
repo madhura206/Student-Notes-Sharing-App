@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Pending Notes</h2>
+<div id="notes"></div>
+
+<script>
+async function loadPending() {
+  const res = await fetch("/pending-notes");
+  const data = await res.json();
+
+  const notesDiv = document.getElementById("notes");
+  notesDiv.innerHTML = "";
+
+  data.forEach(n => {
+    notesDiv.innerHTML += `
+      <div class="note">
+        <b>${n.title}</b> (${n.subject})
+        <p>${n.description}</p>
+
+        <form method="POST" action="/approve-note/${n._id}">
+          <button style="background:green;">Approve</button>
+        </form>
+      </div>
+    `;
+  });
+}
+
+loadPending();
+</script>
+
+</body>
+</html>

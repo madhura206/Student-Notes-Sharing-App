@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Notes Sharing App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="header">
+  Student Notes Sharing App
+</div>
+<div class="navbar">
+  
+  <div>
+    <a href="index.html">Home</a>
+    <a href="notes.html">View All Notes</a>
+  </div>
+</div>
+
+
+
+  <div class="container">
+    <h2>Add Notes</h2>
+
+    <form id="noteForm" name="file" enctype="multipart/form-data" method="POST" action="/add-note">
+  <input type="text" name="title" placeholder="Title" required />
+  <input type="text" name="subject" placeholder="Subject" required />
+  <textarea name="description" placeholder="Description" required></textarea>
+  <input type="file" name="file" accept=".pdf,.doc,.docx" required />
+  <input type="hidden" name="uploadedBy" id="uploadedBy">
+  <button type="submit">Upload Note</button>
+
+</form>
+  </div>
+  <a href="notes.html">
+  
+</a>
+
+<script>
+  const user = localStorage.getItem("username");
+  if (!user) {
+    window.location.href = "login.html";
+  }
+</script>
+<script>
+  document.getElementById("uploadedBy").value =
+    localStorage.getItem("username");
+</script>
+
+
+
+</body>
+
+</html>

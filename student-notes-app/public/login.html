@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <h2>Login</h2>
+  <input type="text" id="username" placeholder="Enter username" required>
+  <button onclick="login()">Login</button>
+</div>
+
+<script>
+  function login() {
+    const username = document.getElementById("username").value;
+    if (!username) return;
+
+    localStorage.setItem("username", username);
+    window.location.href = "index.html";
+  }
+</script>
+
+</body>
+</html>

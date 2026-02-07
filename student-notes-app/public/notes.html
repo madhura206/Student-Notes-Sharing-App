@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Notes</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="navbar">
+  <div class="logo">Student Notes</div>
+  <div>
+    <a href="index.html">Home</a>
+    <a href="notes.html">View All Notes</a>
+  </div>
+</div>
+
+    <div class="notes-wrapper">
+  <h2 class="notes-title">All Notes</h2>
+  <div id="notes"></div>
+</div>
+
+<div class="search-box">
+  <input 
+    type="text" 
+    id="searchInput" 
+    placeholder="Search notes by title, subject or description..."
+    onkeyup="searchNotes()"
+  />
+</div>
+
+<div id="notes"></div>
+  </div>
+
+  <script>
+    let allNotes = [];
+    async function loadNotes() {
+  const res = await fetch("/notes");
+  allNotes = await res.json();
+  displayNotes(allNotes);
+}
+function displayNotes(notes) {
+  const notesDiv = document.getElementById("notes");
+  notesDiv.innerHTML = "";
+
+  if (notes.length === 0) {
+    notesDiv.innerHTML = "<p>No matching notes found</p>";
+    return;
+  }
+
+  const currentUser = localStorage.getItem("username");
+
+notes.forEach(n => {
+  notesDiv.innerHTML += `
+    <div class="note">
+      <b>${n.title}</b> (${n.subject})
+      <p>${n.description}</p>
+      <p><small>Uploaded by: ${n.uploadedBy}</small></p>
+      <a href="/uploads/${n.file}" target="_blank">View / Download</a>
+
+      ${n.uploadedBy === currentUser ? `
+        <form method="POST" action="/delete-note/${n._id}">
+          <input type="hidden" name="username" value="${currentUser}">
+          <button style="background:red;margin-top:10px;">Delete</button>
+        </form>
+      ` : ""}
+    </div>
+  `;
+});
+}
+
+function searchNotes() {
+  const keyword = document.getElementById("searchInput").value.toLowerCase();
+
+  const filteredNotes = allNotes.filter(n =>
+    n.title.toLowerCase().includes(keyword) ||
+    n.subject.toLowerCase().includes(keyword) ||
+    n.description.toLowerCase().includes(keyword)
+  );
+
+  displayNotes(filteredNotes);
+}
+
+
+  loadNotes();
+</script>
+    
+</body>
+</html>
