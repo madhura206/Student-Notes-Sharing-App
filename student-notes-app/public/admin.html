@@ -2,14 +2,74 @@
 <html>
 <head>
   <title>Admin Panel</title>
-  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f6f9;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    .note {
+      background: white;
+      padding: 15px;
+      margin: 15px auto;
+      width: 60%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .note b {
+      font-size: 18px;
+      color: #222;
+    }
+
+    .note p {
+      color: #555;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 8px;
+      color: blue;
+      text-decoration: none;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      background: green;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: darkgreen;
+    }
+
+    .empty {
+      text-align: center;
+      color: gray;
+      margin-top: 50px;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>Pending Notes</h2>
+<h2>Pending Notes (Admin Panel)</h2>
+
 <div id="notes"></div>
 
 <script>
+
 async function loadPending() {
   const res = await fetch("/pending-notes");
   const data = await res.json();
@@ -23,15 +83,47 @@ async function loadPending() {
         <b>${n.title}</b> (${n.subject})
         <p>${n.description}</p>
 
-        <form method="POST" action="/approve-note/${n._id}">
-          <button style="background:green;">Approve</button>
+        <a href="/uploads/${n.file}" target="_blank">
+          📄 View / Download
+        </a>
+
+        <form method="POST" action="/approve-note/${n._id}" style="display:inline;">
+          <button>✅ Approve</button>
         </form>
+
+        <button onclick="deleteNote('${n._id}')" style="background:red;">
+          ❌ Delete
+        </button>
       </div>
     `;
   });
 }
 
+
+async function deleteNote(id) {
+  if (!confirm("Are you sure?")) return;
+
+  try {
+    const res = await fetch(`/admin-delete/${id}`, {
+      method: "POST"
+    });
+
+    if (!res.ok) {
+      throw new Error("Delete failed");
+    }
+
+    alert("Deleted successfully!");
+
+    location.reload(); 
+
+  } catch (err) {
+    console.log(err);
+    alert("Error deleting note");
+  }
+}
+
 loadPending();
+
 </script>
 
 </body>

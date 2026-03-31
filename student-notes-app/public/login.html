@@ -1,26 +1,118 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
-  <link rel="stylesheet" href="style.css">
+<title>Login</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+.password-wrapper{
+  position: relative;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.password-wrapper input{
+  width: 100%;
+  padding: 10px;
+  padding-right: 40px;
+  box-sizing: border-box;
+}
+
+.eye-btn{
+  position: absolute;
+  right: 10px;
+  top: 30%;
+  width: 30px;
+  height: 50px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+</style>
+
 </head>
+
 <body>
 
 <div class="container">
-  <h2>Login</h2>
-  <input type="text" id="username" placeholder="Enter username" required>
-  <button onclick="login()">Login</button>
+<h2>User Login</h2>
+
+<input type="text" id="username" placeholder="Enter username" required><br><br>
+
+<input type="email" id="email" placeholder="Enter email" required><br><br>
+
+<div class="password-wrapper">
+<input type="password" id="password" placeholder="Enter password" required>
+<button type="button" class="eye-btn" onclick="togglePassword('password')">👁️</button>
+</div>
+
+<div class="password-wrapper">
+<input type="password" id="confirmPassword" placeholder="Confirm password" required>
+<button type="button" class="eye-btn" onclick="togglePassword('confirmPassword')">👁️</button>
+</div>
+
+<button class="login-btn" onclick="login()">Login</button>
+
+<p id="error" style="color:red;"></p>
+
 </div>
 
 <script>
-  function login() {
-    const username = document.getElementById("username").value;
-    if (!username) return;
 
-    localStorage.setItem("username", username);
-    window.location.href = "index.html";
-  }
+function togglePassword(id){
+const field = document.getElementById(id);
+
+if(field.type === "password"){
+field.type = "text";
+}else{
+field.type = "password";
+}
+}
+
+function login(){
+
+const username = document.getElementById("username").value.trim();
+const email = document.getElementById("email").value.trim();
+const password = document.getElementById("password").value;
+const confirmPassword = document.getElementById("confirmPassword").value;
+const error = document.getElementById("error");
+
+error.innerText="";
+
+if(username==="" || email==="" || password==="" || confirmPassword===""){
+error.innerText="Please fill all fields.";
+return;
+}
+
+const emailPattern=/^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+
+if(!email.match(emailPattern)){
+error.innerText="Enter a valid email address.";
+return;
+}
+
+if(password.length<6){
+error.innerText="Password must be at least 6 characters.";
+return;
+}
+
+if(password!==confirmPassword){
+error.innerText="Passwords do not match.";
+return;
+}
+
+localStorage.setItem("username",username);
+
+window.location.href="index.html";
+
+}
+
 </script>
 
 </body>
 </html>
+

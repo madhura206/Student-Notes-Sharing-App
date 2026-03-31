@@ -10,18 +10,16 @@ const app = express();
 const fs = require("fs");
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// console.log("MONGO_URI =", process.env.MONGO_URI);
-
-// 🔴 CONNECT FIRST, THEN START SERVER
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB Connected");
 
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || 5001;
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
@@ -32,8 +30,8 @@ mongoose
     console.log("MongoDB connection error:", err.message);
   });
 
-  const fs = require("fs");
-const path = require("path");
+  
+
 
 const uploadDir = path.join(__dirname, "uploads");
 
@@ -74,13 +72,14 @@ app.get("/", (req, res) => {
 // Add note
 app.post("/add-note", upload.single("file"), async (req, res) => {
   try {
-    const note = new Note({
-      title: req.body.title,
-      subject: req.body.subject,
-      description: req.body.description,
-      file: req.file.filename,
-      uploadedBy: req.body.uploadedBy,
-    });
+   const note = new Note({
+  title: req.body.title,
+  subject: req.body.subject,
+  description: req.body.description,
+  file: req.file.filename,
+  uploadedBy: req.body.uploadedBy,
+  isApproved: false   
+});
 
     await note.save();
     res.redirect("/notes.html");
@@ -91,37 +90,46 @@ app.post("/add-note", upload.single("file"), async (req, res) => {
 });
 
 // Delete note
+// app.post("/delete-note/:id", async (req, res) => {
+//   try {
+//     const note = await Note.findById(req.params.id);
+
+//     if (!note) {
+//       return res.status(404).send("Note not found");
+//     }
+
+//     const filePath = path.join(__dirname, "uploads", note.file);
+
+//     fs.unlink(filePath, (err) => {
+//       if (err) console.log("File delete error:", err.message);
+//     });
+
+//     await Note.findByIdAndDelete(req.params.id);
+
+//     res.send("Deleted"); 
+
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).send("Delete failed");
+//   }
+// });
 app.post("/delete-note/:id", async (req, res) => {
+  const note = await Note.findById(req.params.id);
+
+  if (note.uploadedBy !== req.body.username) {
+    return res.status(403).send("Not allowed");
+  }
+
+  await Note.findByIdAndDelete(req.params.id);
+  res.send("Deleted");
+});
+
+app.post("/admin-delete/:id", async (req, res) => {
   try {
-    const note = await Note.findById(req.params.id);
-
-    if (!note) {
-      return res.status(404).send("Note not found");
-    }
-
-    // 🔐 Authorization check
-    if (note.uploadedBy !== req.body.username) {
-      return res.status(403).send("You are not allowed to delete this note");
-    }
-
-    // 🗑️ Delete file from uploads folder
-    const filePath = path.join(__dirname, "uploads", note.file);
-
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.log("File delete error:", err.message);
-      } else {
-        console.log("PDF deleted from uploads folder");
-      }
-    });
-
-    // 🗑️ Delete from MongoDB
     await Note.findByIdAndDelete(req.params.id);
-
-    res.redirect("/notes.html");
+    res.send("Deleted");
   } catch (err) {
-    console.log(err);
-    res.status(500).send("Delete failed");
+    res.status(500).send("Error");
   }
 });
 
@@ -132,6 +140,20 @@ app.get("/pending-notes", async (req, res) => {
 });
 
 app.get("/notes", async (req, res) => {
-  const notes = await Note.find({ isApproved: true });
-  res.json(notes);
+  try {
+    const notes = await Note.find({ isApproved: true });
+    res.json(notes);
+  } catch (err) {
+    res.status(500).send("Error loading notes");
+  }
 });
+app.post("/approve-note/:id", async (req, res) => {
+  try {
+    await Note.findByIdAndUpdate(req.params.id, { isApproved: true });
+    res.redirect("/admin.html");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error approving note");
+  }
+});
+

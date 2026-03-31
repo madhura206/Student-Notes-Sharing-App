@@ -5,10 +5,10 @@ const noteSchema = new mongoose.Schema({
   subject: String,
   description: String,
   file: String,
-  uploadedBy: String,   // 👈 owner
+  uploadedBy: String, 
   isApproved: {
     type: Boolean,
-    default: false   // 👈 important
+    default: false   
   },
   createdAt: {
     type: Date,
